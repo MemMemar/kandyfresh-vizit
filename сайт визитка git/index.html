@@ -1,0 +1,1606 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KandyFresh Dev — Сайты на заказ</title>
+<style>
+/* ===== RESET & VARIABLES ===== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg-primary:#0a0a0a;--bg-secondary:#141414;--bg-card:#1a1a1a;
+  --text-primary:#f0f0f0;--text-secondary:#a0a0a0;
+  --accent:#e63946;--accent-hover:#ff4d5a;--accent-glow:rgba(230,57,70,.4);
+  --border:#2a2a2a;--input-bg:#1e1e1e;
+  --theme-progress:0;
+  --sun-x:85%;--sun-y:15%;
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+  background:var(--bg-primary);color:var(--text-primary);
+  min-height:100vh;overflow-x:hidden;transition:background .3s,color .3s;
+}
+a{color:var(--accent);text-decoration:none;transition:color .3s}
+a:hover{color:var(--accent-hover)}
+img{max-width:100%;display:block}
+::-webkit-scrollbar{width:8px}
+::-webkit-scrollbar-track{background:var(--bg-secondary)}
+::-webkit-scrollbar-thumb{background:var(--accent);border-radius:4px}
+h1{font-size:clamp(2rem,5vw,3.5rem);font-weight:800;line-height:1.1}
+h2{font-size:clamp(1.5rem,3vw,2.5rem);font-weight:700;margin-bottom:1rem}
+h3{font-size:1.3rem;font-weight:600}
+p{line-height:1.7;color:var(--text-secondary)}
+.container{max-width:1200px;margin:0 auto;padding:0 2rem}
+section{padding:6rem 0;position:relative}
+.page{display:none;min-height:100vh}
+.page.active{display:block}
+.navbar{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;
+  background:rgba(10,10,10,.8);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);transition:all .3s;
+}
+.navbar.scrolled{padding:.6rem 2rem;background:rgba(10,10,10,.95)}
+.nav-logo{font-size:1.5rem;font-weight:800;color:var(--text-primary);cursor:pointer}
+.nav-logo span{color:var(--accent)}
+.nav-links{display:flex;gap:2rem;align-items:center;list-style:none}
+.nav-links a{color:var(--text-secondary);font-weight:500;position:relative;transition:color .3s}
+.nav-links a:hover,.nav-links a.active{color:var(--text-primary)}
+.nav-links a::after{
+  content:'';position:absolute;bottom:-4px;left:0;width:0;height:2px;
+  background:var(--accent);transition:width .3s;
+}
+.nav-links a:hover::after,.nav-links a.active::after{width:100%}
+.nav-auth{display:flex;gap:.8rem;align-items:center}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;z-index:1001}
+.hamburger span{width:25px;height:2px;background:var(--text-primary);transition:all .3s}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:.5rem;
+  padding:.8rem 1.8rem;border:none;border-radius:12px;font-size:.95rem;
+  font-weight:600;cursor:pointer;position:relative;overflow:hidden;
+  transition:all .3s ease;text-decoration:none;
+}
+.btn-primary{background:var(--accent);color:#fff;box-shadow:0 4px 15px var(--accent-glow)}
+.btn-primary:hover{background:var(--accent-hover);transform:translateY(-2px);box-shadow:0 8px 25px var(--accent-glow);color:#fff}
+.btn-secondary{background:transparent;color:var(--text-primary);border:2px solid var(--accent)}
+.btn-secondary:hover{background:var(--accent);color:#fff;transform:translateY(-2px)}
+.btn-sm{padding:.5rem 1rem;font-size:.85rem;border-radius:8px}
+.btn-danger{background:#dc3545;color:#fff}
+.btn-danger:hover{background:#c82333;transform:translateY(-2px)}
+.btn-success{background:#28a745;color:#fff}
+.btn-success:hover{background:#218838;transform:translateY(-2px)}
+.btn-ghost{background:transparent;color:var(--text-secondary);padding:.5rem}
+.btn-ghost:hover{color:var(--accent)}
+.btn .ripple{
+  position:absolute;border-radius:50%;background:rgba(255,255,255,.3);
+  transform:scale(0);animation:ripple .6s linear;pointer-events:none;
+}
+@keyframes ripple{to{transform:scale(4);opacity:0}}
+.celestial-container{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  pointer-events:none;z-index:0;overflow:hidden;
+}
+.celestial-body{
+  position:absolute;width:120px;height:120px;
+  transition:transform .1s linear;
+}
+.celestial-body svg{width:100%;height:100%}
+.particles{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.particle{
+  position:absolute;border-radius:50%;background:var(--accent);opacity:.3;
+  animation:float linear infinite;
+}
+@keyframes float{
+  0%{transform:translateY(100vh) rotate(0deg);opacity:0}
+  10%{opacity:.3}
+  90%{opacity:.3}
+  100%{transform:translateY(-100px) rotate(720deg);opacity:0}
+}
+.hero{min-height:100vh;display:flex;align-items:center;position:relative;padding-top:80px}
+.hero-content{position:relative;z-index:2;max-width:700px}
+.hero h1{margin-bottom:1.5rem}
+.hero h1 .highlight{
+  background:linear-gradient(135deg,var(--accent),#ff6b6b);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.hero p{font-size:1.2rem;margin-bottom:2rem;color:var(--text-secondary)}
+.hero-buttons{display:flex;gap:1rem;flex-wrap:wrap}
+.hero-visual{
+  position:absolute;right:5%;top:50%;transform:translateY(-50%);
+  width:400px;height:400px;z-index:1;opacity:.15;
+}
+.hero-visual .code-block{
+  font-family:'Courier New',monospace;font-size:.8rem;color:var(--accent);
+  line-height:1.8;animation:codeScroll 20s linear infinite;
+}
+@keyframes codeScroll{0%{transform:translateY(0)}100%{transform:translateY(-50%)}}
+.section-header{text-align:center;margin-bottom:4rem}
+.section-header h2{position:relative;display:inline-block}
+.section-header h2::after{
+  content:'';position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);
+  width:60px;height:3px;background:var(--accent);border-radius:2px;
+}
+.services-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:2rem}
+.service-card{
+  background:var(--bg-card);border:1px solid var(--border);border-radius:16px;
+  padding:2rem;transition:all .4s ease;position:relative;overflow:hidden;
+}
+.service-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--accent),#ff6b6b);
+  transform:scaleX(0);transition:transform .4s;transform-origin:left;
+}
+.service-card:hover{transform:translateY(-8px);border-color:var(--accent);
+  box-shadow:0 20px 40px rgba(230,57,70,.1)}
+.service-card:hover::before{transform:scaleX(1)}
+.service-icon{font-size:2.5rem;margin-bottom:1rem}
+.service-card h3{margin-bottom:.8rem;color:var(--text-primary)}
+.portfolio-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:2rem}
+.portfolio-card{
+  border-radius:16px;overflow:hidden;position:relative;
+  background:var(--bg-card);border:1px solid var(--border);
+  transition:all .4s;cursor:pointer;
+}
+.portfolio-card:hover{transform:translateY(-5px);box-shadow:0 20px 40px rgba(0,0,0,.3)}
+.portfolio-img{
+  height:200px;background:linear-gradient(135deg,var(--accent),#1a1a2e);
+  display:flex;align-items:center;justify-content:center;font-size:3rem;
+}
+.portfolio-info{padding:1.5rem}
+.portfolio-info h3{margin-bottom:.5rem}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:start}
+.contact-info{display:flex;flex-direction:column;gap:1.5rem}
+.contact-item{display:flex;align-items:center;gap:1rem}
+.contact-item .icon{
+  width:50px;height:50px;border-radius:12px;background:var(--bg-card);
+  border:1px solid var(--border);display:flex;align-items:center;justify-content:center;
+  font-size:1.3rem;
+}
+.form-container{max-width:480px;margin:0 auto;padding:100px 2rem 4rem}
+.form-card{
+  background:var(--bg-card);border:1px solid var(--border);border-radius:20px;
+  padding:2.5rem;position:relative;z-index:2;
+}
+.form-card h2{text-align:center;margin-bottom:.5rem}
+.form-card .subtitle{text-align:center;margin-bottom:2rem;color:var(--text-secondary)}
+.form-group{margin-bottom:1.2rem}
+.form-group label{display:block;margin-bottom:.5rem;font-weight:500;font-size:.9rem}
+.form-group input,.form-group textarea,.form-group select{
+  width:100%;padding:.8rem 1rem;background:var(--input-bg);border:1px solid var(--border);
+  border-radius:10px;color:var(--text-primary);font-size:.95rem;
+  transition:border-color .3s,box-shadow .3s;outline:none;
+}
+.form-group input:focus,.form-group textarea:focus{
+  border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow);
+}
+.form-group textarea{resize:vertical;min-height:100px}
+.form-error{color:#ff6b6b;font-size:.8rem;margin-top:.3rem;display:none}
+.form-error.show{display:block}
+.form-footer{text-align:center;margin-top:1.5rem;color:var(--text-secondary);font-size:.9rem}
+.modal-overlay{
+  position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);
+  backdrop-filter:blur(5px);z-index:2000;display:none;align-items:center;justify-content:center;
+}
+.modal-overlay.active{display:flex}
+.modal{
+  background:var(--bg-card);border:1px solid var(--border);border-radius:20px;
+  padding:2.5rem;max-width:500px;width:90%;max-height:90vh;overflow-y:auto;
+  animation:modalIn .3s ease;
+}
+@keyframes modalIn{from{opacity:0;transform:scale(.9) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal h3{margin-bottom:1rem}
+.modal-close{
+  position:absolute;top:1rem;right:1rem;background:none;border:none;
+  color:var(--text-secondary);font-size:1.5rem;cursor:pointer;
+}
+.reviews-container{padding:100px 2rem 4rem;max-width:900px;margin:0 auto}
+.review-form{
+  background:var(--bg-card);border:1px solid var(--border);border-radius:16px;
+  padding:2rem;margin-bottom:2rem;
+}
+.review-form h3{margin-bottom:1rem}
+.review-list{display:flex;flex-direction:column;gap:1.5rem}
+.review-card{
+  background:var(--bg-card);border:1px solid var(--border);border-radius:16px;
+  padding:1.5rem;transition:all .3s;position:relative;
+}
+.review-card.closed{opacity:.5;border-color:#555}
+.review-header{display:flex;align-items:center;gap:1rem;margin-bottom:1rem}
+.review-avatar{
+  width:45px;height:45px;border-radius:50%;background:var(--accent);
+  display:flex;align-items:center;justify-content:center;font-weight:700;
+  font-size:1.1rem;color:#fff;overflow:hidden;flex-shrink:0;
+}
+.review-avatar img{width:100%;height:100%;object-fit:cover}
+.review-meta{flex:1}
+.review-meta .name{font-weight:600;color:var(--text-primary)}
+.review-meta .date{font-size:.8rem;color:var(--text-secondary)}
+.review-text{color:var(--text-secondary);line-height:1.6;margin-bottom:1rem}
+.review-images{display:flex;gap:.5rem;flex-wrap:wrap}
+.review-images img{
+  width:100px;height:100px;object-fit:cover;border-radius:8px;
+  cursor:pointer;transition:transform .3s;border:1px solid var(--border);
+}
+.review-images img:hover{transform:scale(1.1)}
+.review-actions{display:flex;gap:.5rem;margin-top:1rem}
+.closed-badge{
+  position:absolute;top:1rem;right:1rem;background:#555;color:#fff;
+  padding:.2rem .8rem;border-radius:20px;font-size:.75rem;
+}
+.admin-container{padding:100px 2rem 4rem;max-width:1200px;margin:0 auto}
+.admin-tabs{display:flex;gap:.5rem;margin-bottom:2rem;flex-wrap:wrap}
+.admin-tab{
+  padding:.6rem 1.2rem;border-radius:10px;background:var(--bg-card);
+  border:1px solid var(--border);color:var(--text-secondary);cursor:pointer;
+  transition:all .3s;font-weight:500;
+}
+.admin-tab.active,.admin-tab:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.admin-panel{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:2rem}
+.admin-table{width:100%;border-collapse:collapse;margin-top:1rem}
+.admin-table th,.admin-table td{
+  padding:.8rem;text-align:left;border-bottom:1px solid var(--border);
+}
+.admin-table th{color:var(--text-secondary);font-weight:600;font-size:.85rem;text-transform:uppercase}
+.admin-table tr:hover{background:rgba(230,57,70,.05)}
+.admin-table .actions{display:flex;gap:.5rem}
+.profile-container{padding:100px 2rem 4rem;max-width:600px;margin:0 auto}
+.profile-card{
+  background:var(--bg-card);border:1px solid var(--border);border-radius:20px;
+  padding:2.5rem;text-align:center;
+}
+.profile-avatar{
+  width:100px;height:100px;border-radius:50%;background:var(--accent);
+  margin:0 auto 1.5rem;display:flex;align-items:center;justify-content:center;
+  font-size:2.5rem;font-weight:700;color:#fff;overflow:hidden;cursor:pointer;
+  border:3px solid var(--accent);transition:all .3s;
+}
+.profile-avatar:hover{box-shadow:0 0 20px var(--accent-glow)}
+.profile-avatar img{width:100%;height:100%;object-fit:cover}
+.notification{
+  position:fixed;top:100px;right:2rem;z-index:3000;
+  background:var(--bg-card);border:1px solid var(--accent);border-radius:12px;
+  padding:1rem 1.5rem;max-width:400px;
+  animation:slideIn .3s ease;box-shadow:0 10px 30px rgba(0,0,0,.3);
+}
+@keyframes slideIn{from{opacity:0;transform:translateX(100px)}to{opacity:1;transform:translateX(0)}}
+.notification.success{border-color:#28a745}
+.notification.error{border-color:#dc3545}
+.notification .notif-title{font-weight:600;margin-bottom:.3rem}
+.notification .notif-text{font-size:.85rem;color:var(--text-secondary)}
+.notification .notif-code{
+  font-family:monospace;font-size:1.5rem;font-weight:700;color:var(--accent);
+  text-align:center;margin:.5rem 0;letter-spacing:5px;
+}
+.footer{
+  background:var(--bg-secondary);border-top:1px solid var(--border);
+  padding:3rem 0;text-align:center;position:relative;z-index:2;
+}
+.footer p{color:var(--text-secondary);font-size:.9rem}
+.image-viewer{
+  position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.9);
+  z-index:5000;display:none;align-items:center;justify-content:center;cursor:pointer;
+}
+.image-viewer.active{display:flex}
+.image-viewer img{max-width:90%;max-height:90%;border-radius:8px}
+.fade-in{opacity:0;transform:translateY(30px);transition:all .6s ease}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+.fade-in-left{opacity:0;transform:translateX(-30px);transition:all .6s ease}
+.fade-in-left.visible{opacity:1;transform:translateX(0)}
+.fade-in-right{opacity:0;transform:translateX(30px);transition:all .6s ease}
+.fade-in-right.visible{opacity:1;transform:translateX(0)}
+@media(max-width:768px){
+  .nav-links{
+    position:fixed;top:0;right:-100%;width:70%;height:100vh;
+    background:var(--bg-secondary);flex-direction:column;padding:5rem 2rem;
+    transition:right .3s;border-left:1px solid var(--border);
+  }
+  .nav-links.open{right:0}
+  .hamburger{display:flex}
+  .contact-grid{grid-template-columns:1fr}
+  .hero-visual{display:none}
+  .admin-table{font-size:.8rem}
+  .admin-table th,.admin-table td{padding:.5rem}
+}
+body.light-theme{
+  --bg-primary:#f5f5f5;--bg-secondary:#e8e8e8;--bg-card:#ffffff;
+  --text-primary:#1a1a1a;--text-secondary:#555;
+  --border:#ddd;--input-bg:#f0f0f0;
+}
+body.light-theme .navbar{background:rgba(245,245,245,.8)}
+body.light-theme .navbar.scrolled{background:rgba(245,245,245,.95)}
+body.light-theme .footer{background:#e0e0e0}
+.loader{
+  position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg-primary);
+  z-index:9999;display:flex;align-items:center;justify-content:center;
+  transition:opacity .5s;
+}
+.loader.hidden{opacity:0;pointer-events:none}
+.loader-spinner{
+  width:50px;height:50px;border:3px solid var(--border);
+  border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.badge{display:inline-block;padding:.2rem .6rem;border-radius:20px;font-size:.75rem;font-weight:600}
+.badge-admin{background:var(--accent);color:#fff}
+.badge-user{background:#555;color:#fff}
+.text-center{text-align:center}
+.mt-1{margin-top:1rem}.mt-2{margin-top:2rem}.mb-1{margin-bottom:1rem}.mb-2{margin-bottom:2rem}
+.flex{display:flex}.gap-1{gap:1rem}.items-center{align-items:center}.justify-between{justify-content:space-between}
+.hidden{display:none!important}
+.tag{display:inline-block;padding:.3rem .8rem;background:rgba(230,57,70,.15);color:var(--accent);border-radius:20px;font-size:.8rem;margin:.2rem}
+</style>
+</head>
+<body>
+
+<div class="loader" id="loader"><div class="loader-spinner"></div></div>
+<div class="particles" id="particles"></div>
+
+<div class="celestial-container">
+  <div class="celestial-body" id="celestialBody" style="top:10%;right:10%">
+    <svg viewBox="0 0 200 200" id="celestialSVG">
+      <g id="sunRays" opacity="0">
+        <line x1="100" y1="10" x2="100" y2="30" stroke="#FFD700" stroke-width="4" stroke-linecap="round"/>
+        <line x1="100" y1="170" x2="100" y2="190" stroke="#FFD700" stroke-width="4" stroke-linecap="round"/>
+        <line x1="10" y1="100" x2="30" y2="100" stroke="#FFD700" stroke-width="4" stroke-linecap="round"/>
+        <line x1="170" y1="100" x2="190" y2="100" stroke="#FFD700" stroke-width="4" stroke-linecap="round"/>
+        <line x1="36" y1="36" x2="50" y2="50" stroke="#FFD700" stroke-width="4" stroke-linecap="round"/>
+        <line x1="150" y1="150" x2="164" y2="164" stroke="#FFD700" stroke-width="4" stroke-linecap="round"/>
+        <line x1="164" y1="36" x2="150" y2="50" stroke="#FFD700" stroke-width="4" stroke-linecap="round"/>
+        <line x1="50" y1="150" x2="36" y2="164" stroke="#FFD700" stroke-width="4" stroke-linecap="round"/>
+        <line x1="100" y1="0" x2="100" y2="15" stroke="#FFA500" stroke-width="2" stroke-linecap="round"/>
+        <line x1="100" y1="185" x2="100" y2="200" stroke="#FFA500" stroke-width="2" stroke-linecap="round"/>
+        <line x1="0" y1="100" x2="15" y2="100" stroke="#FFA500" stroke-width="2" stroke-linecap="round"/>
+        <line x1="185" y1="100" x2="200" y2="100" stroke="#FFA500" stroke-width="2" stroke-linecap="round"/>
+      </g>
+      <circle cx="100" cy="100" r="60" id="celestialCircle" fill="#C0C0C0"/>
+      <g id="moonCraters" opacity="1">
+        <circle cx="80" cy="80" r="10" fill="#A0A0A0" opacity=".5"/>
+        <circle cx="120" cy="90" r="7" fill="#A0A0A0" opacity=".4"/>
+        <circle cx="95" cy="120" r="12" fill="#A0A0A0" opacity=".3"/>
+        <circle cx="115" cy="115" r="5" fill="#A0A0A0" opacity=".5"/>
+        <circle cx="75" cy="110" r="6" fill="#A0A0A0" opacity=".4"/>
+      </g>
+    </svg>
+  </div>
+</div>
+
+<nav class="navbar" id="navbar">
+  <div class="nav-logo" onclick="navigate('home')">Kandy<span>Fresh</span></div>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#home" onclick="navigate('home')" class="active" data-page="home">Главная</a></li>
+    <li><a href="#reviews" onclick="navigate('reviews')" data-page="reviews">Отзывы</a></li>
+    <li id="navProfile" class="hidden"><a href="#profile" onclick="navigate('profile')" data-page="profile">Профиль</a></li>
+    <li id="navAdmin" class="hidden"><a href="#admin" onclick="navigate('admin')" data-page="admin">Админ</a></li>
+  </ul>
+  <div class="nav-auth" id="navAuth">
+    <button class="btn btn-secondary btn-sm" onclick="navigate('login')">Войти</button>
+    <button class="btn btn-primary btn-sm" onclick="navigate('register')">Регистрация</button>
+  </div>
+  <div class="nav-auth hidden" id="navUser">
+    <span id="navUsername" style="font-weight:600;cursor:pointer" onclick="navigate('profile')"></span>
+    <button class="btn btn-ghost btn-sm" onclick="logout()">Выйти</button>
+  </div>
+  <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<div class="page active" id="page-home">
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content fade-in">
+        <h1>Создаю <span class="highlight">современные</span> сайты на заказ</h1>
+        <p>Привет! Я KandyFresh Dev — веб-разработчик, который превращает идеи в стильные, быстрые и функциональные веб-решения.</p>
+        <div class="hero-buttons">
+          <button class="btn btn-primary" onclick="navigate('reviews')">📝 Отзывы</button>
+          <button class="btn btn-secondary" onclick="document.getElementById('services').scrollIntoView({behavior:'smooth'})">🚀 Услуги</button>
+        </div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="code-block">
+        &lt;div class="dream"&gt;<br>
+        &nbsp;&nbsp;const site = await<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;kandyfresh.create({<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;design: 'modern',<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;speed: 'blazing',<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;quality: 'premium'<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;});<br>
+        &nbsp;&nbsp;return site.launch();<br>
+        &lt;/div&gt;<br><br>
+        &lt;div class="dream"&gt;<br>
+        &nbsp;&nbsp;const site = await<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;kandyfresh.create({<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;design: 'modern',<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;speed: 'blazing',<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;quality: 'premium'<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;});<br>
+        &nbsp;&nbsp;return site.launch();<br>
+        &lt;/div&gt;
+      </div>
+    </div>
+  </section>
+
+  <section id="services">
+    <div class="container">
+      <div class="section-header fade-in">
+        <h2>Мои услуги</h2>
+      </div>
+      <div class="services-grid" id="servicesGrid">
+        <div class="service-card fade-in">
+          <div class="service-icon">🎨</div>
+          <h3>UI/UX Дизайн</h3>
+          <p>Современный и интуитивный дизайн, который привлекает и удерживает пользователей.</p>
+        </div>
+        <div class="service-card fade-in">
+          <div class="service-icon">💻</div>
+          <h3>Веб-разработка</h3>
+          <p>Адаптивные сайты с чистым кодом, быстрой загрузкой и SEO-оптимизацией.</p>
+        </div>
+        <div class="service-card fade-in">
+          <div class="service-icon">🛒</div>
+          <h3>Интернет-магазины</h3>
+          <p>Полноценные e-commerce решения с корзиной, оплатой и управлением товарами.</p>
+        </div>
+        <div class="service-card fade-in">
+          <div class="service-icon">📱</div>
+          <h3>Мобильная адаптация</h3>
+          <p>Идеальное отображение на любых устройствах — от смартфонов до десктопов.</p>
+        </div>
+        <div class="service-card fade-in">
+          <div class="service-icon">⚡</div>
+          <h3>Оптимизация</h3>
+          <p>Ускорение загрузки, улучшение Core Web Vitals и техническая оптимизация.</p>
+        </div>
+        <div class="service-card fade-in">
+          <div class="service-icon">🔧</div>
+          <h3>Поддержка</h3>
+          <p>Техническая поддержка, обновления и доработки после запуска проекта.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="portfolio">
+    <div class="container">
+      <div class="section-header fade-in">
+        <h2>Портфолио</h2>
+      </div>
+      <div class="portfolio-grid">
+        <div class="portfolio-card fade-in">
+          <div class="portfolio-img">🏪</div>
+          <div class="portfolio-info">
+            <h3>E-Commerce Platform</h3>
+            <p>Интернет-магазин с каталогом, корзиной и онлайн-оплатой.</p>
+            <div class="mt-1"><span class="tag">React</span><span class="tag">Node.js</span></div>
+          </div>
+        </div>
+        <div class="portfolio-card fade-in">
+          <div class="portfolio-img" style="background:linear-gradient(135deg,#667eea,#764ba2)">📊</div>
+          <div class="portfolio-info">
+            <h3>Dashboard Analytics</h3>
+            <p>Панель аналитики с графиками и real-time данными.</p>
+            <div class="mt-1"><span class="tag">Vue.js</span><span class="tag">D3.js</span></div>
+          </div>
+        </div>
+        <div class="portfolio-card fade-in">
+          <div class="portfolio-img" style="background:linear-gradient(135deg,#f093fb,#f5576c)">🎯</div>
+          <div class="portfolio-info">
+            <h3>Landing Page</h3>
+            <p>Высококонверсионная посадочная страница для стартапа.</p>
+            <div class="mt-1"><span class="tag">HTML/CSS</span><span class="tag">GSAP</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <div class="container">
+      <div class="section-header fade-in">
+        <h2>Связаться со мной</h2>
+      </div>
+      <div class="contact-grid">
+        <div class="contact-info fade-in-left">
+          <div class="contact-item">
+            <div class="icon">📧</div>
+            <div><strong>Email</strong><br><span style="color:var(--text-secondary)">kandyfresh@dev.com</span></div>
+          </div>
+          <div class="contact-item">
+            <div class="icon">💬</div>
+            <div><strong>Telegram</strong><br><span style="color:var(--text-secondary)">@kandyfresh_dev</span></div>
+          </div>
+          <div class="contact-item">
+            <div class="icon">🌐</div>
+            <div><strong>GitHub</strong><br><span style="color:var(--text-secondary)">github.com/kandyfresh</span></div>
+          </div>
+        </div>
+        <form class="form-card fade-in-right" onsubmit="handleContactForm(event)">
+          <h3>Напишите мне</h3>
+          <div class="form-group">
+            <label>Ваше имя</label>
+            <input type="text" required placeholder="Как вас зовут?">
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" required placeholder="your@email.com">
+          </div>
+          <div class="form-group">
+            <label>Сообщение</label>
+            <textarea required placeholder="Расскажите о вашем проекте..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%">Отправить сообщение</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <p>© 2025 KandyFresh Dev. Все права защищены.</p>
+    </div>
+  </footer>
+</div>
+
+<div class="page" id="page-login">
+  <div class="form-container">
+    <div class="form-card">
+      <h2>Вход</h2>
+      <p class="subtitle">Войдите в свой аккаунт</p>
+      <form onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="loginEmail" required placeholder="your@email.com">
+        </div>
+        <div class="form-group">
+          <label>Пароль</label>
+          <input type="password" id="loginPassword" required placeholder="••••••••">
+        </div>
+        <div class="form-error" id="loginError"></div>
+        <button type="submit" class="btn btn-primary" style="width:100%;margin-top:1rem">Войти</button>
+      </form>
+      <div class="form-footer">
+        <a href="#" onclick="navigate('forgot')">Забыли пароль?</a><br>
+        Нет аккаунта? <a href="#" onclick="navigate('register')">Зарегистрироваться</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-register">
+  <div class="form-container">
+    <div class="form-card">
+      <h2>Регистрация</h2>
+      <p class="subtitle">Создайте новый аккаунт</p>
+      <form onsubmit="handleRegister(event)">
+        <div class="form-group">
+          <label>Никнейм</label>
+          <input type="text" id="regNickname" required placeholder="Ваш никнейм" minlength="3">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="regEmail" required placeholder="your@email.com">
+        </div>
+        <div class="form-group">
+          <label>Пароль</label>
+          <input type="password" id="regPassword" required placeholder="Минимум 6 символов" minlength="6">
+        </div>
+        <div class="form-group">
+          <label>Подтвердите пароль</label>
+          <input type="password" id="regPasswordConfirm" required placeholder="Повторите пароль">
+        </div>
+        <div class="form-error" id="regError"></div>
+        <button type="submit" class="btn btn-primary" style="width:100%;margin-top:1rem" id="regSubmitBtn">Зарегистрироваться</button>
+      </form>
+      <div class="form-footer">
+        Уже есть аккаунт? <a href="#" onclick="navigate('login')">Войти</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-forgot">
+  <div class="form-container">
+    <div class="form-card">
+      <h2>Восстановление пароля</h2>
+      <p class="subtitle">Введите email, на который зарегистрирован аккаунт</p>
+      <form onsubmit="handleForgotPassword(event)">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="forgotEmail" required placeholder="your@email.com">
+        </div>
+        <div class="form-error" id="forgotError"></div>
+        <button type="submit" class="btn btn-primary" style="width:100%;margin-top:1rem" id="forgotSubmitBtn">Отправить код</button>
+      </form>
+      <div class="form-footer">
+        <a href="#" onclick="navigate('login')">Вернуться ко входу</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-reviews">
+  <div class="reviews-container">
+    <div class="section-header fade-in">
+      <h2>Отзывы</h2>
+    </div>
+    <div id="reviewFormArea"></div>
+    <div class="review-list" id="reviewList"></div>
+  </div>
+</div>
+
+<div class="page" id="page-profile">
+  <div class="profile-container">
+    <div class="profile-card" id="profileCard"></div>
+  </div>
+</div>
+
+<div class="page" id="page-admin">
+  <div class="admin-container">
+    <h2 style="margin-bottom:1.5rem">⚙️ Панель администратора</h2>
+    <div class="admin-tabs" id="adminTabs">
+      <div class="admin-tab active" onclick="switchAdminTab('reviews', this)">Отзывы</div>
+      <div class="admin-tab" onclick="switchAdminTab('users', this)">Пользователи</div>
+      <div class="admin-tab" onclick="switchAdminTab('content', this)">Контент</div>
+      <div class="admin-tab" onclick="switchAdminTab('mailing', this)">Рассылка</div>
+      <div class="admin-tab" onclick="switchAdminTab('settings', this)">Настройки</div>
+    </div>
+    <div class="admin-panel" id="adminPanel"></div>
+  </div>
+</div>
+
+<div class="image-viewer" id="imageViewer" onclick="this.classList.remove('active')">
+  <img id="viewerImg" src="" alt="">
+</div>
+
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<script>
+// ==================== CONFIG ====================
+const API_URL = 'https://your-backend-url.onrender.com'; // URL вашего бэкенда (будет позже)
+
+// ==================== DATA LAYER ====================
+const DB = {
+  get(key, def = null) {
+    try { const d = localStorage.getItem('kf_' + key); return d ? JSON.parse(d) : def; }
+    catch { return def; }
+  },
+  set(key, val) { localStorage.setItem('kf_' + key, JSON.stringify(val)); }
+};
+
+// Init admin
+if (!DB.get('users')) {
+  DB.set('users', [{
+    id: 'admin_1', email: 'admin@kandyfresh.dev', password: 'admin123',
+    nickname: 'KandyFresh', role: 'admin', avatar: '', createdAt: new Date().toISOString()
+  }]);
+}
+if (!DB.get('reviews')) DB.set('reviews', []);
+if (!DB.get('siteContent')) {
+  DB.set('siteContent', {
+    heroTitle: 'Создаю <span class="highlight">современные</span> сайты на заказ',
+    heroDesc: 'Привет! Я KandyFresh Dev — веб-разработчик, который превращает идеи в стильные, быстрые и функциональные веб-решения.',
+    services: [
+      { icon: '🎨', title: 'UI/UX Дизайн', desc: 'Современный и интуитивный дизайн, который привлекает и удерживает пользователей.' },
+      { icon: '💻', title: 'Веб-разработка', desc: 'Адаптивные сайты с чистым кодом, быстрой загрузкой и SEO-оптимизацией.' },
+      { icon: '🛒', title: 'Интернет-магазины', desc: 'Полноценные e-commerce решения с корзиной, оплатой и управлением товарами.' },
+      { icon: '📱', title: 'Мобильная адаптация', desc: 'Идеальное отображение на любых устройствах — от смартфонов до десктопов.' },
+      { icon: '⚡', title: 'Оптимизация', desc: 'Ускорение загрузки, улучшение Core Web Vitals и техническая оптимизация.' },
+      { icon: '🔧', title: 'Поддержка', desc: 'Техническая поддержка, обновления и доработки после запуска проекта.' }
+    ]
+  });
+}
+
+// ==================== AUTH ====================
+function getCurrentUser() {
+  const sid = DB.get('session');
+  if (!sid) return null;
+  const users = DB.get('users', []);
+  return users.find(u => u.id === sid) || null;
+}
+
+function updateNav() {
+  const user = getCurrentUser();
+  const navAuth = document.getElementById('navAuth');
+  const navUser = document.getElementById('navUser');
+  const navProfile = document.getElementById('navProfile');
+  const navAdmin = document.getElementById('navAdmin');
+  if (user) {
+    navAuth.classList.add('hidden');
+    navUser.classList.remove('hidden');
+    navProfile.classList.remove('hidden');
+    document.getElementById('navUsername').textContent = user.nickname;
+    if (user.role === 'admin') navAdmin.classList.remove('hidden');
+    else navAdmin.classList.add('hidden');
+  } else {
+    navAuth.classList.remove('hidden');
+    navUser.classList.add('hidden');
+    navProfile.classList.add('hidden');
+    navAdmin.classList.add('hidden');
+  }
+}
+
+function logout() {
+  DB.set('session', null);
+  updateNav();
+  navigate('home');
+  notify('Вы вышли из аккаунта', '', 'success');
+}
+
+// ==================== NOTIFICATIONS ====================
+function notify(title, text, type = 'info', code = '') {
+  const existing = document.querySelectorAll('.notification');
+  existing.forEach(n => n.remove());
+  const div = document.createElement('div');
+  div.className = `notification ${type}`;
+  div.innerHTML = `<div class="notif-title">${title}</div>${code ? `<div class="notif-code">${code}</div>` : ''}<div class="notif-text">${text}</div>`;
+  document.body.appendChild(div);
+  setTimeout(() => div.remove(), 8000);
+}
+
+// ==================== ROUTER ====================
+function navigate(page) {
+  const user = getCurrentUser();
+  if ((page === 'profile' || page === 'admin') && !user) { navigate('login'); return; }
+  if (page === 'admin' && user && user.role !== 'admin') { navigate('home'); return; }
+
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const target = document.getElementById('page-' + page);
+  if (target) target.classList.add('active');
+
+  document.querySelectorAll('.nav-links a').forEach(a => {
+    a.classList.toggle('active', a.dataset.page === page);
+  });
+
+  window.scrollTo(0, 0);
+  document.getElementById('navLinks').classList.remove('open');
+
+  if (page === 'reviews') renderReviews();
+  if (page === 'profile') renderProfile();
+  if (page === 'admin') renderAdmin('reviews');
+  if (page === 'home') renderHomeContent();
+
+  setTimeout(initObservers, 100);
+}
+
+// ==================== FORM HANDLERS (С ИНТЕГРАЦИЕЙ BACKEND) ====================
+function handleLogin(e) {
+  e.preventDefault();
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const users = DB.get('users', []);
+  const user = users.find(u => u.email === email && u.password === password);
+  const errEl = document.getElementById('loginError');
+  if (!user) {
+    errEl.textContent = 'Неверный email или пароль';
+    errEl.classList.add('show');
+    return;
+  }
+  errEl.classList.remove('show');
+  DB.set('session', user.id);
+  updateNav();
+  notify('Добро пожаловать!', `Привет, ${user.nickname}!`, 'success');
+  navigate('home');
+}
+
+async function handleRegister(e) {
+  e.preventDefault();
+  const nickname = document.getElementById('regNickname').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPassword').value;
+  const confirm = document.getElementById('regPasswordConfirm').value;
+  const errEl = document.getElementById('regError');
+  const submitBtn = document.getElementById('regSubmitBtn');
+
+  if (password !== confirm) {
+    errEl.textContent = 'Пароли не совпадают';
+    errEl.classList.add('show');
+    return;
+  }
+
+  const users = DB.get('users', []);
+  if (users.find(u => u.email === email)) {
+    errEl.textContent = 'Этот email уже зарегистрирован';
+    errEl.classList.add('show');
+    return;
+  }
+  errEl.classList.remove('show');
+
+  // Блокируем кнопку во время запроса
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Отправка кода...';
+
+  try {
+    const res = await fetch(`${API_URL}/api/auth/send-code`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, nickname }),
+    });
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.error || 'Ошибка отправки кода');
+
+    notify('📧 Код отправлен!', `Проверьте почту ${email}`, 'success');
+
+    showModal(`
+      <h3>Подтверждение email</h3>
+      <p style="margin-bottom:1rem;color:var(--text-secondary)">Код отправлен на <strong>${email}</strong></p>
+      <p style="margin-bottom:1rem;font-size:.85rem;color:var(--text-secondary)">Проверьте входящие письма (и папку "Спам")</p>
+      <div class="form-group">
+        <label>Введите 6-значный код из письма</label>
+        <input type="text" id="verifyCodeInput" maxlength="6" placeholder="000000" style="text-align:center;font-size:1.5rem;letter-spacing:5px">
+      </div>
+      <div class="form-error" id="verifyError"></div>
+      <button class="btn btn-primary" style="width:100%;margin-top:1rem" onclick="verifyRegistration('${email}','${nickname}','${password}')">Подтвердить</button>
+      <p style="margin-top:1rem;font-size:.8rem;color:var(--text-secondary);text-align:center">
+        Не получили код? <a href="#" onclick="resendCode('${email}','${nickname}')">Отправить повторно</a>
+      </p>
+    `);
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.classList.add('show');
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Зарегистрироваться';
+  }
+}
+
+async function resendCode(email, nickname) {
+  try {
+    const res = await fetch(`${API_URL}/api/auth/send-code`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, nickname }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    notify('📧 Код отправлен повторно', `Проверьте почту ${email}`, 'success');
+  } catch (err) {
+    notify('❌ Ошибка', err.message, 'error');
+  }
+}
+
+function verifyRegistration(email, nickname, password) {
+  const input = document.getElementById('verifyCodeInput').value.trim();
+  const errEl = document.getElementById('verifyError');
+
+  if (input.length !== 6) {
+    errEl.textContent = 'Введите 6-значный код';
+    errEl.classList.add('show');
+    return;
+  }
+
+  // Сохраняем пользователя локально (в реальном приложении это должен делать бэкенд)
+  const users = DB.get('users', []);
+  const newUser = {
+    id: 'user_' + Date.now(),
+    email,
+    password,
+    nickname,
+    role: 'user',
+    avatar: '',
+    createdAt: new Date().toISOString()
+  };
+  users.push(newUser);
+  DB.set('users', users);
+  DB.set('session', newUser.id);
+
+  closeModal();
+  updateNav();
+  notify('Регистрация успешна!', `Добро пожаловать, ${nickname}!`, 'success');
+  navigate('home');
+}
+
+async function handleForgotPassword(e) {
+  e.preventDefault();
+  const email = document.getElementById('forgotEmail').value.trim();
+  const errEl = document.getElementById('forgotError');
+  const submitBtn = document.getElementById('forgotSubmitBtn');
+
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Отправка...';
+
+  try {
+    const res = await fetch(`${API_URL}/api/auth/forgot-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.error || 'Ошибка отправки кода');
+
+    notify('📧 Код отправлен!', `Проверьте почту ${email}`, 'success');
+
+    showModal(`
+      <h3>Восстановление пароля</h3>
+      <p style="margin-bottom:1rem;color:var(--text-secondary)">Код отправлен на <strong>${email}</strong></p>
+      <div class="form-group">
+        <label>Код из письма</label>
+        <input type="text" id="resetCodeInput" maxlength="6" placeholder="000000" style="text-align:center;font-size:1.5rem;letter-spacing:5px">
+      </div>
+      <div class="form-group">
+        <label>Новый пароль</label>
+        <input type="password" id="resetNewPassword" placeholder="Минимум 6 символов" minlength="6">
+      </div>
+      <div class="form-error" id="resetError"></div>
+      <button class="btn btn-primary" style="width:100%;margin-top:1rem" onclick="resetPassword('${email}')">Сбросить пароль</button>
+      <p style="margin-top:1rem;font-size:.8rem;color:var(--text-secondary);text-align:center">
+        Не получили код? <a href="#" onclick="resendResetCode('${email}')">Отправить повторно</a>
+      </p>
+    `);
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.classList.add('show');
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Отправить код';
+  }
+}
+
+async function resendResetCode(email) {
+  try {
+    const res = await fetch(`${API_URL}/api/auth/forgot-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    notify('📧 Код отправлен повторно', `Проверьте почту ${email}`, 'success');
+  } catch (err) {
+    notify('❌ Ошибка', err.message, 'error');
+  }
+}
+
+function resetPassword(email) {
+  const code = document.getElementById('resetCodeInput').value.trim();
+  const newPass = document.getElementById('resetNewPassword').value;
+  const errEl = document.getElementById('resetError');
+
+  if (code.length !== 6) { errEl.textContent = 'Введите 6-значный код'; errEl.classList.add('show'); return; }
+  if (newPass.length < 6) { errEl.textContent = 'Пароль минимум 6 символов'; errEl.classList.add('show'); return; }
+
+  errEl.classList.remove('show');
+
+  const users = DB.get('users', []);
+  const user = users.find(u => u.email === email);
+  if (user) {
+    user.password = newPass;
+    DB.set('users', users);
+  }
+  closeModal();
+  notify('Пароль изменён!', 'Теперь вы можете войти с новым паролем.', 'success');
+  navigate('login');
+}
+
+function handleContactForm(e) {
+  e.preventDefault();
+  notify('Сообщение отправлено!', 'Я свяжусь с вами в ближайшее время.', 'success');
+  e.target.reset();
+}
+
+// ==================== REVIEWS ====================
+function renderReviews() {
+  const user = getCurrentUser();
+  const formArea = document.getElementById('reviewFormArea');
+  const list = document.getElementById('reviewList');
+
+  if (user) {
+    formArea.innerHTML = `
+      <div class="review-form fade-in">
+        <h3>Оставить отзыв</h3>
+        <form onsubmit="submitReview(event)">
+          <div class="form-group">
+            <label>Ваш отзыв</label>
+            <textarea id="reviewText" required placeholder="Расскажите о вашем опыте..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Фотографии (необязательно)</label>
+            <input type="file" id="reviewPhotos" multiple accept="image/*" onchange="previewReviewPhotos(this)">
+            <div id="reviewPhotoPreview" style="display:flex;gap:.5rem;margin-top:.5rem;flex-wrap:wrap"></div>
+          </div>
+          <button type="submit" class="btn btn-primary">Отправить отзыв</button>
+        </form>
+      </div>`;
+  } else {
+    formArea.innerHTML = `<div class="review-form fade-in" style="text-align:center"><p>Войдите, чтобы оставить отзыв</p><button class="btn btn-primary mt-1" onclick="navigate('login')">Войти</button></div>`;
+  }
+
+  const reviews = DB.get('reviews', []).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const users = DB.get('users', []);
+  const isAdmin = user && user.role === 'admin';
+
+  list.innerHTML = reviews.map(r => {
+    const author = users.find(u => u.id === r.userId);
+    const name = author ? author.nickname : 'Неизвестный';
+    const avatar = author && author.avatar ? `<img src="${author.avatar}" alt="">` : name.charAt(0).toUpperCase();
+    const date = new Date(r.createdAt).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const images = (r.images || []).map(img => `<img src="${img}" onclick="viewImage('${img.replace(/'/g, "\\'")}')">`).join('');
+    const closedBadge = r.closed ? '<span class="closed-badge">Закрыт</span>' : '';
+    const adminActions = isAdmin ? `
+      <div class="review-actions">
+        <button class="btn btn-sm ${r.closed ? 'btn-success' : 'btn-secondary'}" onclick="toggleReview('${r.id}')">${r.closed ? 'Открыть' : 'Закрыть'}</button>
+        <button class="btn btn-sm btn-secondary" onclick="editReview('${r.id}')">Редактировать</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteReview('${r.id}')">Удалить</button>
+      </div>` : '';
+
+    return `<div class="review-card fade-in ${r.closed ? 'closed' : ''}">
+      ${closedBadge}
+      <div class="review-header">
+        <div class="review-avatar">${avatar}</div>
+        <div class="review-meta">
+          <div class="name">${name}</div>
+          <div class="date">${date}</div>
+        </div>
+      </div>
+      <div class="review-text">${escapeHtml(r.text)}</div>
+      ${images ? `<div class="review-images">${images}</div>` : ''}
+      ${adminActions}
+    </div>`;
+  }).join('');
+
+  setTimeout(initObservers, 100);
+}
+
+let reviewPhotosData = [];
+function previewReviewPhotos(input) {
+  const preview = document.getElementById('reviewPhotoPreview');
+  preview.innerHTML = '';
+  reviewPhotosData = [];
+  Array.from(input.files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      reviewPhotosData.push(e.target.result);
+      preview.innerHTML += `<img src="${e.target.result}" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">`;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function submitReview(e) {
+  e.preventDefault();
+  const user = getCurrentUser();
+  if (!user) return;
+  const text = document.getElementById('reviewText').value.trim();
+  if (!text) return;
+  const reviews = DB.get('reviews', []);
+  reviews.push({
+    id: 'rev_' + Date.now(), userId: user.id, text,
+    images: reviewPhotosData, closed: false, createdAt: new Date().toISOString()
+  });
+  DB.set('reviews', reviews);
+  reviewPhotosData = [];
+  notify('Отзыв опубликован!', 'Спасибо за ваш отзыв!', 'success');
+  renderReviews();
+}
+
+function toggleReview(id) {
+  const reviews = DB.get('reviews', []);
+  const r = reviews.find(x => x.id === id);
+  if (r) { r.closed = !r.closed; DB.set('reviews', reviews); renderReviews(); }
+}
+
+function deleteReview(id) {
+  if (!confirm('Удалить этот отзыв?')) return;
+  let reviews = DB.get('reviews', []);
+  reviews = reviews.filter(x => x.id !== id);
+  DB.set('reviews', reviews);
+  notify('Отзыв удалён', '', 'success');
+  renderReviews();
+}
+
+function editReview(id) {
+  const reviews = DB.get('reviews', []);
+  const r = reviews.find(x => x.id === id);
+  if (!r) return;
+  showModal(`
+    <h3>Редактировать отзыв</h3>
+    <div class="form-group">
+      <label>Текст отзыва</label>
+      <textarea id="editReviewText">${escapeHtml(r.text)}</textarea>
+    </div>
+    <button class="btn btn-primary" style="width:100%" onclick="saveEditReview('${id}')">Сохранить</button>
+  `);
+}
+
+function saveEditReview(id) {
+  const text = document.getElementById('editReviewText').value.trim();
+  if (!text) return;
+  const reviews = DB.get('reviews', []);
+  const r = reviews.find(x => x.id === id);
+  if (r) { r.text = text; DB.set('reviews', reviews); }
+  closeModal();
+  notify('Отзыв обновлён', '', 'success');
+  renderReviews();
+}
+
+function viewImage(src) {
+  document.getElementById('viewerImg').src = src;
+  document.getElementById('imageViewer').classList.add('active');
+}
+
+// ==================== PROFILE ====================
+function renderProfile() {
+  const user = getCurrentUser();
+  if (!user) return;
+  const avatar = user.avatar ? `<img src="${user.avatar}" alt="">` : user.nickname.charAt(0).toUpperCase();
+  document.getElementById('profileCard').innerHTML = `
+    <div class="profile-avatar" onclick="document.getElementById('avatarInput').click()">
+      ${avatar}
+      <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="changeAvatar(this)">
+    </div>
+    <h2>${escapeHtml(user.nickname)}</h2>
+    <p style="color:var(--text-secondary);margin-bottom:.5rem">${user.email}</p>
+    <span class="badge ${user.role === 'admin' ? 'badge-admin' : 'badge-user'}">${user.role === 'admin' ? 'Администратор' : 'Пользователь'}</span>
+    <p style="font-size:.8rem;color:var(--text-secondary);margin-top:1rem">Нажмите на аватарку, чтобы изменить</p>
+    <hr style="border-color:var(--border);margin:2rem 0">
+    <form onsubmit="updateProfile(event)">
+      <div class="form-group">
+        <label>Никнейм</label>
+        <input type="text" id="profileNickname" value="${escapeHtml(user.nickname)}" required minlength="3">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" value="${user.email}" disabled style="opacity:.5">
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%">Сохранить изменения</button>
+    </form>
+  `;
+}
+
+function changeAvatar(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const users = DB.get('users', []);
+    const user = users.find(u => u.id === getCurrentUser().id);
+    if (user) { user.avatar = e.target.result; DB.set('users', users); }
+    renderProfile();
+    updateNav();
+    notify('Аватарка обновлена!', '', 'success');
+  };
+  reader.readAsDataURL(file);
+}
+
+function updateProfile(e) {
+  e.preventDefault();
+  const nickname = document.getElementById('profileNickname').value.trim();
+  const users = DB.get('users', []);
+  const user = users.find(u => u.id === getCurrentUser().id);
+  if (user) { user.nickname = nickname; DB.set('users', users); }
+  updateNav();
+  renderProfile();
+  notify('Профиль обновлён!', '', 'success');
+}
+
+// ==================== ADMIN ====================
+let currentAdminTab = 'reviews';
+function switchAdminTab(tab, el) {
+  currentAdminTab = tab;
+  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderAdmin(tab);
+}
+
+function renderAdmin(tab) {
+  const panel = document.getElementById('adminPanel');
+  if (tab === 'reviews') renderAdminReviews(panel);
+  else if (tab === 'users') renderAdminUsers(panel);
+  else if (tab === 'content') renderAdminContent(panel);
+  else if (tab === 'mailing') renderAdminMailing(panel);
+  else if (tab === 'settings') renderAdminSettings(panel);
+}
+
+function renderAdminReviews(panel) {
+  const reviews = DB.get('reviews', []);
+  const users = DB.get('users', []);
+  if (reviews.length === 0) { panel.innerHTML = '<p style="color:var(--text-secondary)">Отзывов пока нет.</p>'; return; }
+  panel.innerHTML = `<table class="admin-table">
+    <tr><th>Автор</th><th>Текст</th><th>Дата</th><th>Статус</th><th>Действия</th></tr>
+    ${reviews.map(r => {
+      const author = users.find(u => u.id === r.userId);
+      const date = new Date(r.createdAt).toLocaleDateString('ru-RU');
+      return `<tr>
+        <td>${author ? escapeHtml(author.nickname) : 'N/A'}</td>
+        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(r.text)}</td>
+        <td>${date}</td>
+        <td>${r.closed ? '<span class="badge" style="background:#555">Закрыт</span>' : '<span class="badge badge-admin">Открыт</span>'}</td>
+        <td class="actions">
+          <button class="btn btn-sm ${r.closed ? 'btn-success' : 'btn-secondary'}" onclick="toggleReview('${r.id}');renderAdmin('reviews')">${r.closed ? 'Открыть' : 'Закрыть'}</button>
+          <button class="btn btn-sm btn-secondary" onclick="editReview('${r.id}')">✏️</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteReview('${r.id}');renderAdmin('reviews')">🗑</button>
+        </td>
+      </tr>`;
+    }).join('')}
+  </table>`;
+}
+
+function renderAdminUsers(panel) {
+  const users = DB.get('users', []);
+  panel.innerHTML = `<table class="admin-table">
+    <tr><th>Аватар</th><th>Никнейм</th><th>Email</th><th>Роль</th><th>Дата регистрации</th><th>Действия</th></tr>
+    ${users.map(u => {
+      const date = new Date(u.createdAt).toLocaleDateString('ru-RU');
+      const avatar = u.avatar ? `<img src="${u.avatar}" style="width:35px;height:35px;border-radius:50%;object-fit:cover">` : `<div style="width:35px;height:35px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700">${u.nickname.charAt(0)}</div>`;
+      return `<tr>
+        <td>${avatar}</td>
+        <td>${escapeHtml(u.nickname)}</td>
+        <td>${u.email}</td>
+        <td><span class="badge ${u.role === 'admin' ? 'badge-admin' : 'badge-user'}">${u.role}</span></td>
+        <td>${date}</td>
+        <td class="actions">
+          <button class="btn btn-sm btn-secondary" onclick="editUser('${u.id}')">✏️</button>
+          ${u.role !== 'admin' ? `<button class="btn btn-sm btn-danger" onclick="deleteUser('${u.id}')">🗑</button>` : ''}
+        </td>
+      </tr>`;
+    }).join('')}
+  </table>`;
+}
+
+function editUser(id) {
+  const users = DB.get('users', []);
+  const u = users.find(x => x.id === id);
+  if (!u) return;
+  showModal(`
+    <h3>Редактировать пользователя</h3>
+    <div class="form-group">
+      <label>Никнейм</label>
+      <input type="text" id="editUserNick" value="${escapeHtml(u.nickname)}">
+    </div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="editUserEmail" value="${u.email}">
+    </div>
+    <div class="form-group">
+      <label>Новый пароль (оставьте пустым, чтобы не менять)</label>
+      <input type="password" id="editUserPass" placeholder="••••••">
+    </div>
+    <div class="form-group">
+      <label>Роль</label>
+      <select id="editUserRole">
+        <option value="user" ${u.role === 'user' ? 'selected' : ''}>Пользователь</option>
+        <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Администратор</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" style="width:100%" onclick="saveEditUser('${id}')">Сохранить</button>
+  `);
+}
+
+function saveEditUser(id) {
+  const users = DB.get('users', []);
+  const u = users.find(x => x.id === id);
+  if (!u) return;
+  u.nickname = document.getElementById('editUserNick').value.trim() || u.nickname;
+  u.email = document.getElementById('editUserEmail').value.trim() || u.email;
+  const newPass = document.getElementById('editUserPass').value;
+  if (newPass) u.password = newPass;
+  u.role = document.getElementById('editUserRole').value;
+  DB.set('users', users);
+  closeModal();
+  notify('Пользователь обновлён', '', 'success');
+  renderAdmin('users');
+}
+
+function deleteUser(id) {
+  if (!confirm('Удалить этого пользователя?')) return;
+  let users = DB.get('users', []);
+  users = users.filter(u => u.id !== id);
+  DB.set('users', users);
+  let reviews = DB.get('reviews', []);
+  reviews = reviews.filter(r => r.userId !== id);
+  DB.set('reviews', reviews);
+  notify('Пользователь удалён', '', 'success');
+  renderAdmin('users');
+}
+
+function renderAdminContent(panel) {
+  const content = DB.get('siteContent');
+  panel.innerHTML = `
+    <h3 style="margin-bottom:1rem">Редактирование контента главной страницы</h3>
+    <form onsubmit="saveContent(event)">
+      <div class="form-group">
+        <label>Заголовок Hero (HTML)</label>
+        <input type="text" id="contentHeroTitle" value="${escapeHtml(content.heroTitle)}">
+      </div>
+      <div class="form-group">
+        <label>Описание Hero</label>
+        <textarea id="contentHeroDesc">${escapeHtml(content.heroDesc)}</textarea>
+      </div>
+      <h4 style="margin:1.5rem 0 1rem">Услуги</h4>
+      <div id="servicesEditor">
+        ${content.services.map((s, i) => `
+          <div style="background:var(--bg-secondary);padding:1rem;border-radius:10px;margin-bottom:1rem">
+            <div class="form-group"><label>Иконка</label><input type="text" class="svc-icon" value="${s.icon}"></div>
+            <div class="form-group"><label>Заголовок</label><input type="text" class="svc-title" value="${escapeHtml(s.title)}"></div>
+            <div class="form-group"><label>Описание</label><textarea class="svc-desc">${escapeHtml(s.desc)}</textarea></div>
+            <button type="button" class="btn btn-sm btn-danger" onclick="this.parentElement.remove()">Удалить</button>
+          </div>
+        `).join('')}
+      </div>
+      <button type="button" class="btn btn-secondary btn-sm mb-2" onclick="addServiceEditor()">+ Добавить услугу</button>
+      <button type="submit" class="btn btn-primary" style="width:100%">Сохранить контент</button>
+    </form>
+  `;
+}
+
+function addServiceEditor() {
+  const div = document.createElement('div');
+  div.style.cssText = 'background:var(--bg-secondary);padding:1rem;border-radius:10px;margin-bottom:1rem';
+  div.innerHTML = `
+    <div class="form-group"><label>Иконка</label><input type="text" class="svc-icon" value="🚀"></div>
+    <div class="form-group"><label>Заголовок</label><input type="text" class="svc-title" value=""></div>
+    <div class="form-group"><label>Описание</label><textarea class="svc-desc"></textarea></div>
+    <button type="button" class="btn btn-sm btn-danger" onclick="this.parentElement.remove()">Удалить</button>
+  `;
+  document.getElementById('servicesEditor').appendChild(div);
+}
+
+function saveContent(e) {
+  e.preventDefault();
+  const content = DB.get('siteContent');
+  content.heroTitle = document.getElementById('contentHeroTitle').value;
+  content.heroDesc = document.getElementById('contentHeroDesc').value;
+  const icons = document.querySelectorAll('.svc-icon');
+  const titles = document.querySelectorAll('.svc-title');
+  const descs = document.querySelectorAll('.svc-desc');
+  content.services = [];
+  icons.forEach((el, i) => {
+    if (titles[i].value.trim()) {
+      content.services.push({ icon: el.value, title: titles[i].value, desc: descs[i].value });
+    }
+  });
+  DB.set('siteContent', content);
+  notify('Контент обновлён!', '', 'success');
+  renderHomeContent();
+}
+
+function renderHomeContent() {
+  const content = DB.get('siteContent');
+  const heroH1 = document.querySelector('.hero h1');
+  const heroP = document.querySelector('.hero p');
+  if (heroH1) heroH1.innerHTML = content.heroTitle;
+  if (heroP) heroP.textContent = content.heroDesc;
+
+  const grid = document.getElementById('servicesGrid');
+  if (grid) {
+    grid.innerHTML = content.services.map(s => `
+      <div class="service-card fade-in">
+        <div class="service-icon">${s.icon}</div>
+        <h3>${escapeHtml(s.title)}</h3>
+        <p>${escapeHtml(s.desc)}</p>
+      </div>
+    `).join('');
+  }
+}
+
+function renderAdminMailing(panel) {
+  const users = DB.get('users', []).filter(u => u.role !== 'admin');
+  panel.innerHTML = `
+    <h3 style="margin-bottom:1rem">Email-рассылка</h3>
+    <p style="color:var(--text-secondary);margin-bottom:1rem">Получателей: ${users.length}</p>
+    <form onsubmit="sendMailing(event)">
+      <div class="form-group">
+        <label>Тема письма</label>
+        <input type="text" id="mailSubject" required placeholder="Тема рассылки">
+      </div>
+      <div class="form-group">
+        <label>Сообщение</label>
+        <textarea id="mailBody" required placeholder="Текст рассылки..." style="min-height:150px"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%" id="mailingBtn">📧 Отправить рассылку</button>
+    </form>
+  `;
+}
+
+async function sendMailing(e) {
+  e.preventDefault();
+  const subject = document.getElementById('mailSubject').value;
+  const body = document.getElementById('mailBody').value;
+  const users = DB.get('users', []).filter(u => u.role !== 'admin');
+  const btn = document.getElementById('mailingBtn');
+
+  btn.disabled = true;
+  btn.textContent = 'Отправка...';
+
+  try {
+    const res = await fetch(`${API_URL}/api/mailing`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        subject,
+        body,
+        recipients: users.map(u => u.email),
+      }),
+    });
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.error);
+
+    notify('✅ Рассылка отправлена!', `Отправлено ${data.sent} писем`, 'success');
+    e.target.reset();
+  } catch (err) {
+    notify('❌ Ошибка', err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '📧 Отправить рассылку';
+  }
+}
+
+function renderAdminSettings(panel) {
+  const admin = getCurrentUser();
+  panel.innerHTML = `
+    <h3 style="margin-bottom:1rem">Настройки администратора</h3>
+    <form onsubmit="updateAdminSettings(event)">
+      <div class="form-group">
+        <label>Логин (Email)</label>
+        <input type="email" id="adminEmail" value="${admin.email}" required>
+      </div>
+      <div class="form-group">
+        <label>Никнейм</label>
+        <input type="text" id="adminNick" value="${escapeHtml(admin.nickname)}" required>
+      </div>
+      <div class="form-group">
+        <label>Новый пароль (оставьте пустым, чтобы не менять)</label>
+        <input type="password" id="adminNewPass" placeholder="••••••">
+      </div>
+      <div class="form-group">
+        <label>Подтвердите текущий пароль</label>
+        <input type="password" id="adminCurrentPass" required placeholder="Текущий пароль">
+      </div>
+      <div class="form-error" id="adminSettingsError"></div>
+      <button type="submit" class="btn btn-primary" style="width:100%">Сохранить настройки</button>
+    </form>
+  `;
+}
+
+function updateAdminSettings(e) {
+  e.preventDefault();
+  const admin = getCurrentUser();
+  const currentPass = document.getElementById('adminCurrentPass').value;
+  const errEl = document.getElementById('adminSettingsError');
+  if (currentPass !== admin.password) { errEl.textContent = 'Неверный текущий пароль'; errEl.classList.add('show'); return; }
+  errEl.classList.remove('show');
+  const users = DB.get('users', []);
+  const u = users.find(x => x.id === admin.id);
+  u.email = document.getElementById('adminEmail').value.trim();
+  u.nickname = document.getElementById('adminNick').value.trim();
+  const newPass = document.getElementById('adminNewPass').value;
+  if (newPass) u.password = newPass;
+  DB.set('users', users);
+  updateNav();
+  notify('Настройки сохранены!', '', 'success');
+  renderAdmin('settings');
+}
+
+// ==================== MODAL ====================
+function showModal(html) {
+  document.getElementById('modalContent').innerHTML = html;
+  document.getElementById('modalOverlay').classList.add('active');
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('active');
+}
+
+// ==================== MOON/SUN ANIMATION ====================
+function initCelestialAnimation() {
+  const body = document.getElementById('celestialBody');
+  const circle = document.getElementById('celestialCircle');
+  const craters = document.getElementById('moonCraters');
+  const rays = document.getElementById('sunRays');
+  const homePage = document.getElementById('page-home');
+
+  window.addEventListener('scroll', () => {
+    if (!homePage.classList.contains('active')) return;
+    const scrollY = window.scrollY;
+    const maxScroll = document.body.scrollHeight - window.innerHeight;
+    const progress = Math.min(scrollY / Math.max(maxScroll * 0.5, 1), 1);
+
+    const rotation = progress * 360;
+    body.style.transform = `rotate(${rotation}deg)`;
+
+    const r = Math.round(192 + (255 - 192) * progress);
+    const g = Math.round(192 + (215 - 192) * progress);
+    const b = Math.round(192 + (0 - 192) * progress);
+    circle.setAttribute('fill', `rgb(${r},${g},${b})`);
+
+    craters.setAttribute('opacity', 1 - progress);
+    rays.setAttribute('opacity', progress);
+
+    if (progress > 0.5) {
+      document.body.classList.add('light-theme');
+    } else {
+      document.body.classList.remove('light-theme');
+    }
+
+    const yPos = 10 + progress * 30;
+    body.style.top = yPos + '%';
+  });
+}
+
+// ==================== PARTICLES ====================
+function initParticles() {
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 30; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = Math.random() * 4 + 2;
+    p.style.width = size + 'px';
+    p.style.height = size + 'px';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDuration = (Math.random() * 15 + 10) + 's';
+    p.style.animationDelay = (Math.random() * 15) + 's';
+    container.appendChild(p);
+  }
+}
+
+// ==================== INTERSECTION OBSERVER ====================
+function initObservers() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.fade-in, .fade-in-left, .fade-in-right').forEach(el => observer.observe(el));
+}
+
+// ==================== NAVBAR SCROLL ====================
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
+});
+
+// ==================== HAMBURGER ====================
+function toggleMenu() {
+  document.getElementById('navLinks').classList.toggle('open');
+}
+
+// ==================== RIPPLE EFFECT ====================
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.btn');
+  if (!btn) return;
+  const ripple = document.createElement('span');
+  ripple.className = 'ripple';
+  const rect = btn.getBoundingClientRect();
+  const size = Math.max(rect.width, rect.height);
+  ripple.style.width = ripple.style.height = size + 'px';
+  ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+  ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+  btn.appendChild(ripple);
+  setTimeout(() => ripple.remove(), 600);
+});
+
+// ==================== UTILS ====================
+function escapeHtml(str) {
+  if (!str) return '';
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// ==================== INIT ====================
+window.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => document.getElementById('loader').classList.add('hidden'), 800);
+  updateNav();
+  initParticles();
+  initCelestialAnimation();
+  initObservers();
+  renderHomeContent();
+
+  const hash = location.hash.replace('#', '');
+  if (hash && document.getElementById('page-' + hash)) navigate(hash);
+});
+
+window.addEventListener('hashchange', () => {
+  const hash = location.hash.replace('#', '');
+  if (hash && document.getElementById('page-' + hash)) navigate(hash);
+});
+</script>
+</body>
+</html>
